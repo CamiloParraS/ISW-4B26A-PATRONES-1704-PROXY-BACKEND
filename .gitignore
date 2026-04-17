@@ -31,3 +31,11 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Runtime data ###
+data/
+
+### Logs ###
+*.log
+docs
+postman
