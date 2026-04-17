@@ -5,6 +5,8 @@ import java.util.Map;
 
 public class UserAccount {
     private String userId;
+    private String email;
+    private String username;
     private String encryptedPassword;
     private Plan plan;
     private long monthlyTokensUsed;
@@ -17,9 +19,11 @@ public class UserAccount {
         this.plan = Plan.FREE;
     }
 
-    public UserAccount(String userId, String encryptedPassword, Plan plan, String currentMonth,
-            String monthlyResetDate) {
+    public UserAccount(String userId, String email, String username, String encryptedPassword,
+            Plan plan, String currentMonth, String monthlyResetDate) {
         this.userId = userId;
+        this.email = email;
+        this.username = username;
         this.encryptedPassword = encryptedPassword;
         this.plan = plan;
         this.currentMonth = currentMonth;
@@ -34,6 +38,22 @@ public class UserAccount {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getEncryptedPassword() {

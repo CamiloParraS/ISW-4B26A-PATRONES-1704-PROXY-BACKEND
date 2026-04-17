@@ -2,12 +2,12 @@ package com.slop.gpt.dto;
 
 import com.slop.gpt.model.Plan;
 
-public class UserRegistrationResponseDto {
+public class UserLoginResponseDto {
     private String userId;
     private String email;
     private String username;
     private Plan currentPlan;
-    private String createdAt;
+    private String loggedInAt;
 
     public String getUserId() {
         return userId;
@@ -41,11 +41,11 @@ public class UserRegistrationResponseDto {
         this.currentPlan = currentPlan;
     }
 
-    public String getCreatedAt() {
-        return createdAt;
+    public String getLoggedInAt() {
+        return loggedInAt;
     }
 
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
+    public void setLoggedInAt(String loggedInAt) {
+        this.loggedInAt = loggedInAt;
     }
 }

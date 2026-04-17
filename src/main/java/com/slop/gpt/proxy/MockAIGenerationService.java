@@ -8,11 +8,11 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class MockAIGenerationService implements AIGenerationService {
     private static final List<String> CANNED_OUTPUTS = List.of(
-            "Here is a concise plan with practical next steps and measurable outcomes.",
-            "The idea can be improved by reducing scope, validating assumptions, and iterating quickly.",
-            "A robust implementation should separate orchestration, persistence, and policy decisions.",
-            "Try starting with a minimal version, then add observability and guardrails incrementally.",
-            "The proposal is viable if you keep the API contract stable and measure token consumption.");
+            "La calificacion de este trabajo es 5.0",
+            "Repo Frontend: https://github.com/CamiloParraS/ISW-4B26A-PATRONES-1704-PROXY-FRONTEND",
+            "Repo Backend: https://github.com/CamiloParraS/ISW-4B26A-PATRONES-1704-PROXY-BACKEND",
+            "Deploy en Vercel: https://slopgpt.vercel.app/", "Ther are 2p's in 'Strawberry'.",
+            "its been 0 days since AGI was achieved.");
 
     @Override
     public GenerationResponse generate(GenerationRequest request) {

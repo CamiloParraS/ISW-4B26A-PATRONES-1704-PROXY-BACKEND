@@ -79,18 +79,37 @@ public class JsonStateRepository implements StateRepository {
     }
 
     @Override
-    public void registerUser(String userId, String encryptedPassword, Plan initialPlan,
-            String createdAt) {
+    public void registerUser(String userId, String email, String username, String encryptedPassword,
+            Plan initialPlan, String createdAt) {
         lock.writeLock().lock();
         try {
-            if (state.getUsers().containsKey(userId)) {
+            if (findExistingUserUnsafe(userId, email, username) != null) {
                 throw new IllegalStateException("User already exists");
             }
 
             LocalDate today = LocalDate.now(zoneId);
-            UserAccount user = buildDefaultUser(userId, encryptedPassword, initialPlan, today);
+            UserAccount user = buildDefaultUser(userId, email, username, encryptedPassword,
+                    initialPlan, today);
             state.getUsers().put(userId, user);
             writeStateUnsafe();
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    @Override
+    public UserAccount authenticateUser(String identifier, String encryptedPassword) {
+        lock.writeLock().lock();
+        try {
+            UserAccount user = findUserByIdentifierUnsafe(identifier);
+            if (user == null || user.getEncryptedPassword() == null
+                    || !user.getEncryptedPassword().equals(encryptedPassword)) {
+                throw new IllegalStateException("Invalid credentials");
+            }
+
+            normalizeUserUnsafe(user, LocalDate.now(zoneId));
+            writeStateUnsafe();
+            return user;
         } finally {
             lock.writeLock().unlock();
         }
@@ -321,7 +340,7 @@ public class JsonStateRepository implements StateRepository {
     private UserAccount getOrCreateUserUnsafe(String userId, LocalDate today) {
         UserAccount existing = state.getUsers().get(userId);
         if (existing == null) {
-            UserAccount created = buildDefaultUser(userId, null, Plan.FREE, today);
+            UserAccount created = buildDefaultUser(userId, null, null, null, Plan.FREE, today);
             state.getUsers().put(userId, created);
             return created;
         }
@@ -330,10 +349,10 @@ public class JsonStateRepository implements StateRepository {
         return existing;
     }
 
-    private UserAccount buildDefaultUser(String userId, String encryptedPassword, Plan plan,
-            LocalDate today) {
-        return new UserAccount(userId, encryptedPassword, plan, YearMonth.from(today).toString(),
-                nextMonthlyResetDate(today));
+    private UserAccount buildDefaultUser(String userId, String email, String username,
+            String encryptedPassword, Plan plan, LocalDate today) {
+        return new UserAccount(userId, email, username, encryptedPassword, plan,
+                YearMonth.from(today).toString(), nextMonthlyResetDate(today));
     }
 
     private void normalizeUserUnsafe(UserAccount user, LocalDate today) {
@@ -358,6 +377,41 @@ public class JsonStateRepository implements StateRepository {
         }
 
         pruneHistoryUnsafe(user, today);
+    }
+
+    private UserAccount findExistingUserUnsafe(String userId, String email, String username) {
+        if (state.getUsers().containsKey(userId)) {
+            return state.getUsers().get(userId);
+        }
+
+        for (UserAccount user : state.getUsers().values()) {
+            if (email != null && user.getEmail() != null
+                    && user.getEmail().equalsIgnoreCase(email)) {
+                return user;
+            }
+            if (username != null && user.getUsername() != null
+                    && user.getUsername().equalsIgnoreCase(username)) {
+                return user;
+            }
+        }
+        return null;
+    }
+
+    private UserAccount findUserByIdentifierUnsafe(String identifier) {
+        UserAccount directMatch = state.getUsers().get(identifier);
+        if (directMatch != null) {
+            return directMatch;
+        }
+
+        for (UserAccount user : state.getUsers().values()) {
+            if (user.getEmail() != null && user.getEmail().equalsIgnoreCase(identifier)) {
+                return user;
+            }
+            if (user.getUsername() != null && user.getUsername().equalsIgnoreCase(identifier)) {
+                return user;
+            }
+        }
+        return null;
     }
 
     private void pruneHistoryUnsafe(UserAccount user, LocalDate today) {

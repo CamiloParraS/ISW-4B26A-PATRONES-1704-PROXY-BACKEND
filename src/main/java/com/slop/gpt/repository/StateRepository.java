@@ -6,13 +6,17 @@ import com.slop.gpt.model.QuotaConsumption;
 import com.slop.gpt.model.QuotaStatusSnapshot;
 import com.slop.gpt.model.RateLimitDecision;
 import com.slop.gpt.model.UpgradeHistoryEntry;
+import com.slop.gpt.model.UserAccount;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
 public interface StateRepository {
-    void registerUser(String userId, String encryptedPassword, Plan initialPlan, String createdAt);
+    void registerUser(String userId, String email, String username, String encryptedPassword,
+            Plan initialPlan, String createdAt);
+
+    UserAccount authenticateUser(String identifier, String encryptedPassword);
 
     Plan getOrCreatePlan(String userId, LocalDate today);
 

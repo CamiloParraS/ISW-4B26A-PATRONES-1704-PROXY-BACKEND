@@ -4,6 +4,7 @@ import com.slop.gpt.exception.BadRequestException;
 import com.slop.gpt.exception.ResourceConflictException;
 import com.slop.gpt.model.Plan;
 import com.slop.gpt.model.UpgradeHistoryEntry;
+import com.slop.gpt.model.UserAccount;
 import com.slop.gpt.repository.StateRepository;
 import org.springframework.stereotype.Service;
 
@@ -20,12 +21,21 @@ public class SubscriptionService {
         this.clock = clock;
     }
 
-    public void registerUser(String userId, String encryptedPassword) {
+    public void registerUser(String userId, String email, String username,
+            String encryptedPassword) {
         try {
-            stateRepository.registerUser(userId, encryptedPassword, Plan.FREE,
+            stateRepository.registerUser(userId, email, username, encryptedPassword, Plan.FREE,
                     Instant.now(clock).toString());
         } catch (IllegalStateException ex) {
             throw new ResourceConflictException("User already exists");
+        }
+    }
+
+    public UserAccount loginUser(String identifier, String encryptedPassword) {
+        try {
+            return stateRepository.authenticateUser(identifier, encryptedPassword);
+        } catch (IllegalStateException ex) {
+            throw new BadRequestException("Invalid credentials");
         }
     }
 
