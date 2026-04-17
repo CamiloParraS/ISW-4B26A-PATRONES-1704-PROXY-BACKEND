@@ -2,7 +2,10 @@ package com.slop.gpt.controller;
 
 import com.slop.gpt.dto.UserRegistrationRequestDto;
 import com.slop.gpt.dto.UserRegistrationResponseDto;
+import com.slop.gpt.dto.UserLoginRequestDto;
+import com.slop.gpt.dto.UserLoginResponseDto;
 import com.slop.gpt.model.Plan;
+import com.slop.gpt.model.UserAccount;
 import com.slop.gpt.service.SubscriptionService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -29,13 +32,32 @@ public class UserController {
     public ResponseEntity<UserRegistrationResponseDto> register(
             @Valid @RequestBody UserRegistrationRequestDto request) {
         // Password arrives already encrypted and is persisted as-is by design.
-        subscriptionService.registerUser(request.getUserId(), request.getEncryptedPassword());
+        subscriptionService.registerUser(request.getUserId(), request.getEmail(),
+                request.getUsername(), request.getEncryptedPassword());
 
         UserRegistrationResponseDto response = new UserRegistrationResponseDto();
         response.setUserId(request.getUserId());
+        response.setEmail(request.getEmail());
+        response.setUsername(request.getUsername());
         response.setCurrentPlan(Plan.FREE);
         response.setCreatedAt(Instant.now().toString());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<UserLoginResponseDto> login(
+            @Valid @RequestBody UserLoginRequestDto request) {
+        UserAccount account = subscriptionService.loginUser(request.getIdentifier(),
+                request.getEncryptedPassword());
+
+        UserLoginResponseDto response = new UserLoginResponseDto();
+        response.setUserId(account.getUserId());
+        response.setEmail(account.getEmail());
+        response.setUsername(account.getUsername());
+        response.setCurrentPlan(account.getPlan());
+        response.setLoggedInAt(Instant.now().toString());
+
+        return ResponseEntity.ok(response);
     }
 }
