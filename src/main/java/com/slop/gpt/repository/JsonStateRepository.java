@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import tools.jackson.databind.ObjectMapper;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Repository
 public class JsonStateRepository implements StateRepository {
@@ -98,12 +99,16 @@ public class JsonStateRepository implements StateRepository {
     }
 
     @Override
-    public UserAccount authenticateUser(String identifier, String encryptedPassword) {
+    public UserAccount authenticateUser(String identifier, String password) {
         lock.writeLock().lock();
         try {
             UserAccount user = findUserByIdentifierUnsafe(identifier);
-            if (user == null || user.getEncryptedPassword() == null
-                    || !user.getEncryptedPassword().equals(encryptedPassword)) {
+            if (user == null || user.getEncryptedPassword() == null) {
+                throw new IllegalStateException("Invalid credentials");
+            }
+
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+            if (!encoder.matches(password, user.getEncryptedPassword())) {
                 throw new IllegalStateException("Invalid credentials");
             }
 

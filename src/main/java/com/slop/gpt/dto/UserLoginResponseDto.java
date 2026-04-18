@@ -8,6 +8,7 @@ public class UserLoginResponseDto {
     private String username;
     private Plan currentPlan;
     private String loggedInAt;
+    private String token;
 
     public String getUserId() {
         return userId;
@@ -47,5 +48,13 @@ public class UserLoginResponseDto {
 
     public void setLoggedInAt(String loggedInAt) {
         this.loggedInAt = loggedInAt;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

@@ -25,8 +25,7 @@ public class MockAIGenerationService implements AIGenerationService {
         }
 
         int randomIndex = ThreadLocalRandom.current().nextInt(CANNED_OUTPUTS.size());
-        String responseText = CANNED_OUTPUTS.get(randomIndex) + " Prompt fragment: \""
-                + trimPrompt(request.getPrompt()) + "\".";
+        String responseText = CANNED_OUTPUTS.get(randomIndex);
 
         GenerationResponse response = new GenerationResponse();
         response.setUserId(request.getUserId());

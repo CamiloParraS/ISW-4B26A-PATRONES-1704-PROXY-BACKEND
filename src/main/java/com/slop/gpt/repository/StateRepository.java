@@ -16,7 +16,7 @@ public interface StateRepository {
     void registerUser(String userId, String email, String username, String encryptedPassword,
             Plan initialPlan, String createdAt);
 
-    UserAccount authenticateUser(String identifier, String encryptedPassword);
+    UserAccount authenticateUser(String identifier, String password);
 
     Plan getOrCreatePlan(String userId, LocalDate today);
 

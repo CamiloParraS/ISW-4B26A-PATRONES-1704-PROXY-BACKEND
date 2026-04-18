@@ -17,26 +17,28 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
+import com.slop.gpt.util.JwtUtil;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
     private final SubscriptionService subscriptionService;
+    private final JwtUtil jwtUtil;
 
-    public UserController(SubscriptionService subscriptionService) {
+    public UserController(SubscriptionService subscriptionService, JwtUtil jwtUtil) {
         this.subscriptionService = subscriptionService;
+        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<UserRegistrationResponseDto> register(
             @Valid @RequestBody UserRegistrationRequestDto request) {
-        // Password arrives already encrypted and is persisted as-is by design.
-        subscriptionService.registerUser(request.getUserId(), request.getEmail(),
-                request.getUsername(), request.getEncryptedPassword());
+        String userId = subscriptionService.registerUser(request.getEmail(), request.getUsername(),
+                request.getPassword());
 
         UserRegistrationResponseDto response = new UserRegistrationResponseDto();
-        response.setUserId(request.getUserId());
+        response.setUserId(userId);
         response.setEmail(request.getEmail());
         response.setUsername(request.getUsername());
         response.setCurrentPlan(Plan.FREE);
@@ -48,8 +50,8 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<UserLoginResponseDto> login(
             @Valid @RequestBody UserLoginRequestDto request) {
-        UserAccount account = subscriptionService.loginUser(request.getIdentifier(),
-                request.getEncryptedPassword());
+        UserAccount account =
+                subscriptionService.loginUser(request.getIdentifier(), request.getPassword());
 
         UserLoginResponseDto response = new UserLoginResponseDto();
         response.setUserId(account.getUserId());
@@ -57,6 +59,8 @@ public class UserController {
         response.setUsername(account.getUsername());
         response.setCurrentPlan(account.getPlan());
         response.setLoggedInAt(Instant.now().toString());
+        String token = jwtUtil.generateToken(account.getUserId());
+        response.setToken(token);
 
         return ResponseEntity.ok(response);
     }

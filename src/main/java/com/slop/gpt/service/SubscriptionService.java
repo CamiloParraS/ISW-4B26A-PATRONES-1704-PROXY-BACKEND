@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.UUID;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Service
 public class SubscriptionService {
@@ -21,19 +23,22 @@ public class SubscriptionService {
         this.clock = clock;
     }
 
-    public void registerUser(String userId, String email, String username,
-            String encryptedPassword) {
+    public String registerUser(String email, String username, String password) {
         try {
-            stateRepository.registerUser(userId, email, username, encryptedPassword, Plan.FREE,
+            String userId = UUID.randomUUID().toString();
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+            String hashed = encoder.encode(password);
+            stateRepository.registerUser(userId, email, username, hashed, Plan.FREE,
                     Instant.now(clock).toString());
+            return userId;
         } catch (IllegalStateException ex) {
             throw new ResourceConflictException("User already exists");
         }
     }
 
-    public UserAccount loginUser(String identifier, String encryptedPassword) {
+    public UserAccount loginUser(String identifier, String password) {
         try {
-            return stateRepository.authenticateUser(identifier, encryptedPassword);
+            return stateRepository.authenticateUser(identifier, password);
         } catch (IllegalStateException ex) {
             throw new BadRequestException("Invalid credentials");
         }

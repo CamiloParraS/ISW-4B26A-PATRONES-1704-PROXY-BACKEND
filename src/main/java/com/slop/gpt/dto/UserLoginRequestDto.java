@@ -8,9 +8,9 @@ public class UserLoginRequestDto {
     @Size(max = 120, message = "identifier must not exceed 120 characters")
     private String identifier;
 
-    @NotBlank(message = "encryptedPassword is required")
-    @Size(max = 400, message = "encryptedPassword must not exceed 400 characters")
-    private String encryptedPassword;
+    @NotBlank(message = "password is required")
+    @Size(max = 400, message = "password must not exceed 400 characters")
+    private String password;
 
     public String getIdentifier() {
         return identifier;
@@ -20,11 +20,11 @@ public class UserLoginRequestDto {
         this.identifier = identifier;
     }
 
-    public String getEncryptedPassword() {
-        return encryptedPassword;
+    public String getPassword() {
+        return password;
     }
 
-    public void setEncryptedPassword(String encryptedPassword) {
-        this.encryptedPassword = encryptedPassword;
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
